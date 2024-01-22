@@ -4,9 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -40,13 +38,16 @@ class MainViewModel : ViewModel() {
 
     fun getNext() {
         viewModelScope.launch(Dispatchers.IO) {
-            mutableNextPageLoad.emit(true)
-            delay(2000)
-            mutableNextPageLoad.emit(false)
-            savedItems += List(50) {
-                ++itemIndex
+            // Set a limit to 150 items to prove that at the end we still have the overscoll effect working
+            if (savedItems.size < 150) {
+                mutableNextPageLoad.emit(true)
+                delay(2000)
+                mutableNextPageLoad.emit(false)
+                savedItems += List(50) {
+                    ++itemIndex
+                }
+                mutableItems.emit(savedItems.toList())
             }
-            mutableItems.emit(savedItems.toList())
         }
     }
 }
